@@ -12,7 +12,7 @@ dotenv.config();
 
 
 
-const mongoClient = new MongoClient(process.env.DATABASE_URI);
+const mongoClient = new MongoClient(process.env.DATABASE_URL);
 let db;
 
 mongoClient.connect().then(() => {
