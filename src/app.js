@@ -1,15 +1,18 @@
 import express from 'express';
 import cors from 'cors';
-import chalk from "chalk"
+import chalk from 'chalk';
+import dotenv from 'dotenv';
 import { MongoClient } from "mongodb";
 
 const app = express();
+
 app.use(express.json());
 app.use(cors())
+dotenv.config();
 
 
 
-const mongoClient = new MongoClient("mongodb://localhost:27017/nomeDoBanco");
+const mongoClient = new MongoClient(process.env.DATABASE_URI);
 let db;
 
 mongoClient.connect().then(() => {
