@@ -16,6 +16,8 @@ mongoClient.connect().then(() => {
     db = mongoClient.db();
 }).catch((err) => console.log(err.message))
 
+
+
 const PORT = 5000;
 app.listen(PORT, () => {
     console.log(chalk.green(`Rodando em http://localhost:${PORT}`));
