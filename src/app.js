@@ -110,7 +110,42 @@ app.post("/messages", (req, res) => {
 
 
 });
-app.get("/messages", (req, res) => { });
+app.get("/messages", (req, res) => {
+
+    const user = req.headers.user;
+    const limit = req.query.limit;
+
+    const query = {
+        $or: [
+            { to: user },
+            { from: user },
+            { to: "Todos" },
+            { type: "message" }
+        ]
+    };
+
+    const lastMessages = {
+        sort: { _id: -1 }
+    };
+
+    if (limit && (isNaN(limit) || limit <= 0)) {
+        return res.sendStatus(422);
+    }
+
+    db.collection("messages").find(query, lastMessages).toArray()
+        .then(messages => {
+            if (messages && messages.length > 0) {
+                if (limit) {
+                    messages = messages.slice(0, parseInt(limit));
+                }
+                res.send(messages);
+            } else {
+                res.sendStatus(404)
+            }
+        })
+        .catch(err => res.send(err.message))
+
+});
 
 
 app.post("/status", (req, res) => {
@@ -150,7 +185,7 @@ app.post("/status", (req, res) => {
         });
 });
 
-function removingInativeUsers() {
+/*function removingInativeUsers() {
     const rightNow = dayjs();
     const statusRightNow = Date.now();
 
@@ -179,7 +214,7 @@ function removingInativeUsers() {
         .catch(err => console.log(err.message))
 }
 
-const interval = setInterval(removingInativeUsers, 15000)
+const interval = setInterval(removingInativeUsers, 15000)*/
 
 
 const PORT = 5000;
