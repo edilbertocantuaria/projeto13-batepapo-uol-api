@@ -36,23 +36,31 @@ app.post("/participants", (req, res) => {
     const validation = userSchema.validate(req.body)
     if (validation.error) return res.sendStatus(422)
 
-    //procurar alguma coisa no bd aqui!
+    db.collection("participants").findOne({ name: name })
+        .then((infosUser) => {
+            if (infosUser) {
+                return res.sendStatus(409)
+            } else {
+                db.collection("participants").insertOne({
+                    name: name,
+                    lastStatus: Date.now()
+                }).then(() => {
+                    db.collection("messages").insertOne({
+                        from: name,
+                        to: 'Todos',
+                        text: 'entra na sala...',
+                        type: 'status',
+                        time: rigthNow.format('HH:mm:ss')
+                    })
+                        .then(() => res.sendStatus(201))
+                        .catch(() => res.send(err.message))
 
-    const loginUser = db.collection("participants").insertOne({
-        name: name,
-        lastStatus: Date.now()
-    })
-    loginUser.then(() => res.sendStatus(201));
-    loginUser.catch(() => res.send("algum erro aconteceu!"))
+                })
+                    .catch(err => res.send(err.message))
 
-    const userLogged = db.collection("messages").insertOne({
-        from: name,
-        to: 'Todos',
-        text: 'entra na sala...',
-        type: 'status',
-        time: rigthNow.format('HH:mm:ss')
-    })
-
+            }
+        })
+        .catch(err => res.send(err.message))
 });
 
 
