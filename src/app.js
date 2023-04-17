@@ -6,6 +6,9 @@ import { MongoClient, ObjectId } from "mongodb";
 import joi from 'joi';
 import dayjs from 'dayjs';
 import "dayjs/locale/pt-br.js";
+import { stripHtml } from "string-strip-html";
+
+
 
 
 dayjs.locale('pt-br');
@@ -32,10 +35,12 @@ const userSchema = joi.object({
 })
 
 app.post("/participants", (req, res) => {
-    const { name } = req.body;
+    let { name } = req.body;
 
     const validation = userSchema.validate(req.body);
     if (validation.error) return res.sendStatus(422);
+
+    name = stripHtml(name).result.trim();
 
     db.collection("participants").findOne({ name: name })
         .then((infosUser) => {
@@ -54,7 +59,7 @@ app.post("/participants", (req, res) => {
                         time: rightNow.format('HH:mm:ss')
                     })
                         .then(() => res.sendStatus(201))
-                        .catch(() => res.send(err.message))
+                        .catch(err => res.send(err.message))
 
                 })
                     .catch(err => res.send(err.message))
@@ -81,12 +86,16 @@ const messageSchema = joi.object({
 })
 
 app.post("/messages", (req, res) => {
+    let { to, text, type } = req.body;
+    let user = req.headers.user;
 
-    const { to, text, type } = req.body;
-    const user = req.headers.user;
+    user = stripHtml(user).result.trim();
+    to = stripHtml(to).result.trim();
+    text = stripHtml(text).result.trim();
 
     const validation = messageSchema.validate(req.body);
     if (validation.error) return res.sendStatus(422);
+
 
     db.collection("participants").findOne({ name: user })
         .then((infoUser) => {
@@ -197,7 +206,7 @@ function removingInativeUsers() {
                 db.collection("participants").deleteOne({ _id: new ObjectId(_id.toString()) })
                     .then(
                         db.collection("messages").insertOne({
-                            from: name,
+                            from: name.trim(),
                             to: 'Todos',
                             text: 'sai da sala...',
                             type: 'status',
@@ -214,7 +223,7 @@ function removingInativeUsers() {
         .catch(err => console.log(err.message))
 }
 
-const interval = setInterval(removingInativeUsers, 15000)
+/*const interval = setInterval(removingInativeUsers, 15000)*/
 
 
 const PORT = 5000;
