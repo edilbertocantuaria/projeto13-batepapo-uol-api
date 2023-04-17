@@ -220,7 +220,7 @@ function removingInativeUsers() {
         .catch(err => console.log(err.message))
 }
 
-//const interval = setInterval(removingInativeUsers, 15000)
+const interval = setInterval(removingInativeUsers, 15000)
 
 
 const PORT = 5000;
