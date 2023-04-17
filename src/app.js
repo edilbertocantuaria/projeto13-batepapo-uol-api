@@ -185,7 +185,7 @@ app.post("/status", (req, res) => {
         });
 });
 
-/*function removingInativeUsers() {
+function removingInativeUsers() {
     const rightNow = dayjs();
     const statusRightNow = Date.now();
 
@@ -214,7 +214,7 @@ app.post("/status", (req, res) => {
         .catch(err => console.log(err.message))
 }
 
-const interval = setInterval(removingInativeUsers, 15000)*/
+const interval = setInterval(removingInativeUsers, 15000)
 
 
 const PORT = 5000;
