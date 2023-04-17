@@ -7,6 +7,7 @@ import joi from 'joi';
 import dayjs from 'dayjs';
 import "dayjs/locale/pt-br.js";
 
+
 dayjs.locale('pt-br');
 const rigthNow = dayjs();
 
@@ -89,10 +90,8 @@ app.post("/messages", (req, res) => {
 
     db.collection("participants").findOne({ name: user })
         .then((infoUser) => {
-            //console.log(infoUser)
+
             if (infoUser) {
-                console.log("entrou no if do infoUser!")
-                /*return res.sendStatus(422);*/
                 db.collection("messages").insertOne({
                     from: user,
                     to: to,
@@ -105,16 +104,6 @@ app.post("/messages", (req, res) => {
                     .catch(() => res.send(err.message))
             } else {
                 return res.sendStatus(422);
-                /*db.collection("messages").insertOne({
-                    from: user,
-                    to: to,
-                    text: text,
-                    type: type,
-                    time: rigthNow.format('HH:mm:ss')
-
-                })
-                    .then(() => res.sendStatus(201))
-                    .catch(() => res.send(err.message))*/
             }
         })
         .catch(() => res.sendStatus(422))
@@ -123,7 +112,43 @@ app.post("/messages", (req, res) => {
 });
 app.get("/messages", (req, res) => { });
 
-app.post("/status", (req, res) => { });
+
+app.post("/status", (req, res) => {
+    const user = req.headers.user;
+
+    if (!user) {
+        console.log("preencha o nome!")
+        res.sendStatus(404);
+        return;
+    }
+
+    const newTimestamp = Date.now();
+    console.log(newTimestamp);
+
+    db.collection("participants").findOne({ name: user })
+        .then((infoUser) => {
+            if (infoUser) {
+                /*console.log(infoUser),
+                    console.log(infoUser._id.toString()),
+                    console.log(infoUser.name),
+                    console.log(infoUser.lastStatus);*/
+
+                db.collection("participants").updateOne(
+                    { _id: new ObjectId(infoUser._id.toString()) },
+                    { $set: { lastStatus: newTimestamp } }
+                ).then(() => {
+                    res.sendStatus(200);
+                }).catch(() => {
+                    res.send("deu ruim!");
+                });
+            } else {
+                res.sendStatus(404);
+            }
+        })
+        .catch(() => {
+            res.sendStatus(404);
+        });
+});
 
 
 
