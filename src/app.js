@@ -9,8 +9,6 @@ import "dayjs/locale/pt-br.js";
 import { stripHtml } from "string-strip-html";
 
 
-
-
 dayjs.locale('pt-br');
 const rightNow = dayjs();
 
@@ -156,7 +154,6 @@ app.get("/messages", (req, res) => {
 
 });
 
-
 app.post("/status", (req, res) => {
     const user = req.headers.user;
 
@@ -223,7 +220,7 @@ function removingInativeUsers() {
         .catch(err => console.log(err.message))
 }
 
-/*const interval = setInterval(removingInativeUsers, 15000)*/
+const interval = setInterval(removingInativeUsers, 15000)
 
 
 const PORT = 5000;
