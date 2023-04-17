@@ -78,8 +78,8 @@ app.get("/participants", (req, res) => {
 
 
 const messageSchema = joi.object({
-    to: joi.string().required(),
-    text: joi.string().required(),
+    to: joi.string().trim().required().empty(false),
+    text: joi.string().trim().required().empty(false),
     type: joi.valid('message', 'private_message').required()
 })
 
@@ -87,12 +87,12 @@ app.post("/messages", (req, res) => {
     let { to, text, type } = req.body;
     let user = req.headers.user;
 
+    const validation = messageSchema.validate(req.body);
+    if (validation.error) return res.sendStatus(422);
+
     user = stripHtml(user).result.trim();
     to = stripHtml(to).result.trim();
     text = stripHtml(text).result.trim();
-
-    const validation = messageSchema.validate(req.body);
-    if (validation.error) return res.sendStatus(422);
 
 
     db.collection("participants").findOne({ name: user })
@@ -220,7 +220,7 @@ function removingInativeUsers() {
         .catch(err => console.log(err.message))
 }
 
-const interval = setInterval(removingInativeUsers, 15000)
+//const interval = setInterval(removingInativeUsers, 15000)
 
 
 const PORT = 5000;
