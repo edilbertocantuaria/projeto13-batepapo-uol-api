@@ -9,7 +9,7 @@ import "dayjs/locale/pt-br.js";
 
 
 dayjs.locale('pt-br');
-const rigthNow = dayjs();
+const rightNow = dayjs();
 
 const app = express();
 
@@ -51,7 +51,7 @@ app.post("/participants", (req, res) => {
                         to: 'Todos',
                         text: 'entra na sala...',
                         type: 'status',
-                        time: rigthNow.format('HH:mm:ss')
+                        time: rightNow.format('HH:mm:ss')
                     })
                         .then(() => res.sendStatus(201))
                         .catch(() => res.send(err.message))
@@ -97,11 +97,11 @@ app.post("/messages", (req, res) => {
                     to: to,
                     text: text,
                     type: type,
-                    time: rigthNow.format('HH:mm:ss')
+                    time: rightNow.format('HH:mm:ss')
 
                 })
                     .then(() => res.sendStatus(201))
-                    .catch(() => res.send(err.message))
+                    .catch(err => res.send(err.message))
             } else {
                 return res.sendStatus(422);
             }
@@ -139,7 +139,7 @@ app.post("/status", (req, res) => {
                 ).then(() => {
                     res.sendStatus(200);
                 }).catch(() => {
-                    res.send("deu ruim!");
+                    res.send("Something went wrong!");
                 });
             } else {
                 res.sendStatus(404);
@@ -150,7 +150,36 @@ app.post("/status", (req, res) => {
         });
 });
 
+function removingInativeUsers() {
+    const rightNow = dayjs();
+    const statusRightNow = Date.now();
 
+    db.collection("participants").find({ lastStatus: { $lt: (statusRightNow - 10000) } }).toArray()
+        .then((infosUser) => {
+            infosUser.forEach((user) => {
+                const { name, _id } = user;
+
+                db.collection("participants").deleteOne({ _id: new ObjectId(_id.toString()) })
+                    .then(
+                        db.collection("messages").insertOne({
+                            from: name,
+                            to: 'Todos',
+                            text: 'sai da sala...',
+                            type: 'status',
+                            time: rightNow.format('HH:mm:ss')
+                        })
+                            .then()
+                            .catch(err => console.log(err.message))
+
+                    )
+                    .catch(err => console.log(err.message))
+            })
+
+        })
+        .catch(err => console.log(err.message))
+}
+
+const interval = setInterval(removingInativeUsers, 15000)
 
 
 const PORT = 5000;
