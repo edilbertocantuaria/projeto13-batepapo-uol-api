@@ -94,6 +94,7 @@ app.post("/messages", (req, res) => {
     to = stripHtml(to).result.trim();
     text = stripHtml(text).result.trim();
 
+    if (!user) return res.sendStatus(422)
 
     db.collection("participants").findOne({ name: user })
         .then((infoUser) => {
